@@ -1,0 +1,277 @@
+import { createClient } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
+
+export async function POST(request: NextRequest) {
+  console.log('Received registration request');
+  
+  // Create a new Supabase client
+  let supabase;
+  try {
+    supabase = createClient();
+  } catch (e: any) {
+    console.error('Failed to create Supabase client:', e);
+    return NextResponse.json(
+      { error: 'Failed to initialize Supabase client: ' + e.message },
+      { status: 500 }
+    );
+  }
+
+  try {
+    // Check if tables exist
+    let tablesReady = true;
+    let errorMessage = '';
+    
+    try {
+      // Test if trades table exists
+      const { data: testData, error: testError } = await supabase.from('trades').select('id').limit(1);
+      
+      if (testError) {
+        console.error('Trades table check failed:', testError);
+        tablesReady = false;
+        errorMessage = 'Trades table not ready: ' + testError.message;
+      }
+    } catch (e: any) {
+      console.error('Error checking trades table:', e);
+      tablesReady = false;
+      errorMessage = 'Error checking trades table: ' + e.message;
+    }
+    
+    try {
+      // Test if documents table exists
+      const { data: docData, error: docError } = await supabase.from('documents').select('id').limit(1);
+      
+      if (docError && !errorMessage) {
+        console.error('Documents table check failed:', docError);
+        tablesReady = false;
+        errorMessage = 'Documents table not ready: ' + docError.message;
+      }
+    } catch (e: any) {
+      if (!errorMessage) {
+        console.error('Error checking documents table:', e);
+        tablesReady = false;
+        errorMessage = 'Error checking documents table: ' + e.message;
+      }
+    }
+    
+    if (!tablesReady) {
+      return NextResponse.json(
+        { error: 'Database tables not ready. ' + errorMessage },
+        { status: 500 }
+      );
+    }
+    
+    console.log('Supabase connection and tables validated successfully');
+    
+    // Parse the form data from the request
+    const formData = await request.formData();
+    console.log('Form data received:', Array.from(formData.entries()).map(([key, value]) => {
+      return { key, type: value instanceof File ? 'File' : typeof value };
+    }));
+    
+    const fullName = formData.get('fullName') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const phone = formData.get('phone') as string;
+    const trade = formData.get('trade') as string;
+    const companyName = formData.get('companyName') as string;
+    const postcode = formData.get('postcode') as string;
+
+    // Optional document fields
+    const insuranceDocument = formData.get('insuranceDocument') as File | null;
+    const qualificationDocument = formData.get('qualificationDocument') as File | null;
+    const insuranceExpiry = formData.get('insuranceExpiry') as string | null;
+    const qualificationNumber = formData.get('qualificationNumber') as string | null;
+
+    // Validate required fields
+    if (!fullName || !email || !password || !phone || !trade || !companyName || !postcode) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Check if specific trades require documents
+    const requiresDocs = ['Electrician', 'Gas', 'HVAC'].includes(trade);
+    if (requiresDocs && (!insuranceDocument || !qualificationDocument)) {
+      return NextResponse.json(
+        { error: 'Insurance and qualification documents are required for this trade' },
+        { status: 400 }
+      );
+    }
+
+    // 1. Create a new user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          role: 'tradesperson',
+        },
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/login`,
+      },
+    });
+
+    if (authError || !authData.user) {
+      console.error('Auth error:', authError);
+      return NextResponse.json(
+        { error: authError?.message || 'Failed to create user account' },
+        { status: 500 }
+      );
+    }
+
+    const userId = authData.user.id;
+    
+    // 2. Insert trade record in the database
+    const { data: tradeData, error: tradeError } = await supabase
+      .from('trades')
+      .insert([
+        {
+          id: userId,
+          full_name: fullName,
+          email,
+          phone,
+          trade,
+          company_name: companyName,
+          postcode,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+        },
+      ])
+      .select();
+
+    if (tradeError) {
+      console.error('Trade record error:', tradeError);
+      // We can't use admin.deleteUser with the anon key
+      // Just log the error and return
+      return NextResponse.json(
+        { error: 'Failed to create trade record: ' + tradeError.message },
+        { status: 500 }
+      );
+    }
+
+    // 3. Check if documents bucket exists and create if needed
+    try {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const documentsBucket = buckets?.find((bucket: any) => bucket.name === 'documents');
+      
+      if (!documentsBucket) {
+        console.log('Creating documents bucket...');
+        await supabase.storage.createBucket('documents', {
+          public: false,
+          fileSizeLimit: 10485760 // 10MB
+        });
+      }
+    } catch (error) {
+      console.error('Error checking/creating bucket:', error);
+      // Continue anyway - might already exist
+    }
+    
+    // Handle document uploads if present
+    const documentUploads = [];
+    
+    if (insuranceDocument) {
+      try {
+        const fileExt = insuranceDocument.name.split('.').pop();
+        const fileName = `${userId}/insurance-${uuidv4()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase
+          .storage
+          .from('documents')
+          .upload(fileName, insuranceDocument);
+        
+        if (uploadError) {
+          console.error('Insurance upload error:', uploadError);
+          return NextResponse.json(
+            { error: 'Failed to upload insurance document: ' + uploadError.message },
+            { status: 500 }
+          );
+        }
+        
+        documentUploads.push({
+          trade_id: userId,
+          doc_type: 'insurance',
+          file_path: fileName,
+          upload_date: new Date().toISOString(),
+          expiry_date: insuranceExpiry || null,
+          status: 'pending',
+        });
+      } catch (error: any) {
+        console.error('Insurance document processing error:', error);
+        return NextResponse.json(
+          { error: 'Failed to process insurance document: ' + error.message },
+          { status: 500 }
+        );
+      }
+    }
+    
+    if (qualificationDocument) {
+      try {
+        const fileExt = qualificationDocument.name.split('.').pop();
+        const fileName = `${userId}/qualification-${uuidv4()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase
+          .storage
+          .from('documents')
+          .upload(fileName, qualificationDocument);
+        
+        if (uploadError) {
+          console.error('Qualification upload error:', uploadError);
+          return NextResponse.json(
+            { error: 'Failed to upload qualification document: ' + uploadError.message },
+            { status: 500 }
+          );
+        }
+        
+        documentUploads.push({
+          trade_id: userId,
+          doc_type: 'qualification',
+          file_path: fileName,
+          upload_date: new Date().toISOString(),
+          doc_number: qualificationNumber || null,
+          status: 'pending',
+        });
+      } catch (error: any) {
+        console.error('Qualification document processing error:', error);
+        return NextResponse.json(
+          { error: 'Failed to process qualification document: ' + error.message },
+          { status: 500 }
+        );
+      }
+    }
+    
+    // 4. Insert document records if we have any uploads
+    if (documentUploads.length > 0) {
+      const { data: docData, error: docError } = await supabase
+        .from('documents')
+        .insert(documentUploads);
+      
+      if (docError) {
+        console.error('Document record error:', docError);
+        return NextResponse.json(
+          { error: 'Failed to create document records: ' + docError.message },
+          { status: 500 }
+        );
+      }
+    }
+    
+    // Success response
+    return NextResponse.json({
+      success: true,
+      message: 'Trade registration successful! Please check your email to verify your account.',
+    });
+  } catch (error: any) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json(
+      { 
+        error: 'An unexpected error occurred', 
+        details: error?.message || String(error),
+        stack: error?.stack || 'No stack trace available',
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 15) + '...',
+        supabaseKeySet: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      },
+      { status: 500 }
+    );
+  }
+}
