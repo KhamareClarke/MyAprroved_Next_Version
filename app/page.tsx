@@ -789,7 +789,7 @@ export default function Home() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/login/tradeperson"
+                      href="/login/trade"
                       className="flex items-center space-x-2 cursor-pointer"
                     >
                       <Wrench className="w-4 h-4" />
