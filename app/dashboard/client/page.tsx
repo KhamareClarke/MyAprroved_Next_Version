@@ -437,7 +437,7 @@ export default function ClientDashboardPage() {
     setAssigning(true);
     setError('');
     try {
-      const response = await fetch('/api/admin/approve-quotation', { // Reusing admin API
+      const response = await fetch('/api/admin-secret/approve-quotation', { // Reusing admin API
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ applicationId, action }),

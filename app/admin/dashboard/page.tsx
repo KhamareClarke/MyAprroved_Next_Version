@@ -176,7 +176,9 @@ export default function AdminDashboardPage() {
       console.log("Admin dashboard - Loading data...");
 
       // Load tradespeople
-      const tradespeopleResponse = await fetch("/api/admin/tradespeople");
+      const tradespeopleResponse = await fetch(
+        "/api/admin-secret/tradespeople"
+      );
       if (tradespeopleResponse.ok) {
         const tradespeopleData = await tradespeopleResponse.json();
         console.log(
@@ -211,7 +213,9 @@ export default function AdminDashboardPage() {
       }
 
       // Load job applications
-      const applicationsResponse = await fetch("/api/admin/job-applications");
+      const applicationsResponse = await fetch(
+        "/api/admin-secret/job-applications"
+      );
       if (applicationsResponse.ok) {
         const applicationsData = await applicationsResponse.json();
         console.log(
@@ -230,7 +234,7 @@ export default function AdminDashboardPage() {
 
   const handleVerifyTradesperson = async (tradespersonId: string) => {
     try {
-      const response = await fetch("/api/admin/verify-tradesperson", {
+      const response = await fetch("/api/admin-secret/verify-tradesperson", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -253,7 +257,7 @@ export default function AdminDashboardPage() {
 
   const handleApproveJob = async (jobId: string) => {
     try {
-      const response = await fetch("/api/admin/approve-job", {
+      const response = await fetch("/api/admin-secret/approve-job", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -279,7 +283,7 @@ export default function AdminDashboardPage() {
     action: "approve" | "reject"
   ) => {
     try {
-      const response = await fetch("/api/admin/approve-quotation", {
+      const response = await fetch("/api/admin-secret/approve-quotation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -306,7 +310,7 @@ export default function AdminDashboardPage() {
   ) => {
     try {
       const { data: tradespeople, error } = await fetch(
-        "/api/admin/tradespeople"
+        "/api/admin-secret/tradespeople"
       ).then((res) => res.json());
 
       if (error) {
@@ -328,9 +332,9 @@ export default function AdminDashboardPage() {
 
   const loadJobApplications = async (jobId: string) => {
     try {
-      const { data, error } = await fetch("/api/admin/job-applications").then(
-        (res) => res.json()
-      );
+      const { data, error } = await fetch(
+        "/api/admin-secret/job-applications"
+      ).then((res) => res.json());
       if (!error) setJobApplications(data || []);
       else setJobApplications([]);
     } catch (err) {
@@ -359,7 +363,7 @@ export default function AdminDashboardPage() {
     setAssigning(true);
     setError("");
     try {
-      const response = await fetch("/api/admin/assign-job", {
+      const response = await fetch("/api/admin-secret/assign-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
