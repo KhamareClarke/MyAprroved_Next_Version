@@ -670,72 +670,77 @@ export default function AdminDashboardPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {jobs.map((job) => (
-                        <TableRow key={job.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">
-                                {job.clients.first_name} {job.clients.last_name}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {job.clients.email}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{job.trade}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              className="max-w-xs truncate"
-                              title={job.job_description}
-                            >
-                              {job.job_description}
-                            </div>
-                          </TableCell>
-                          <TableCell>{job.postcode}</TableCell>
-                          <TableCell>
-                            £{job.budget || "Not specified"} ({job.budget_type})
-                          </TableCell>
-                          <TableCell>
-                            {job.assigned_tradesperson_id ? (
-                              <div className="text-sm">
-                                <div className="font-medium">Assigned</div>
-                                <div className="text-gray-500">
-                                  ID: {job.assigned_tradesperson_id}
+                      {jobs.map(
+                        (job) =>
+                          job && (
+                            <TableRow key={job.id}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">
+                                    {job?.clients?.first_name}{" "}
+                                    {job?.clients?.last_name}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    {job?.clients?.email}
+                                  </div>
                                 </div>
-                                {job.quotation_amount && (
-                                  <div className="text-green-600">
-                                    £{job.quotation_amount}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline">{job?.trade}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div
+                                  className="max-w-xs truncate"
+                                  title={job?.job_description}
+                                >
+                                  {job?.job_description}
+                                </div>
+                              </TableCell>
+                              <TableCell>{job?.postcode}</TableCell>
+                              <TableCell>
+                                £{job?.budget || "Not specified"} (
+                                {job?.budget_type})
+                              </TableCell>
+                              <TableCell>
+                                {job?.assigned_tradesperson_id ? (
+                                  <div className="text-sm">
+                                    <div className="font-medium">Assigned</div>
+                                    <div className="text-gray-500">
+                                      ID: {job?.assigned_tradesperson_id}
+                                    </div>
+                                    {job?.quotation_amount && (
+                                      <div className="text-green-600">
+                                        £{job?.quotation_amount}
+                                      </div>
+                                    )}
+                                    {job?.assigned_by && (
+                                      <div className="text-xs text-gray-400">
+                                        By:{" "}
+                                        {job?.assigned_by === "client"
+                                          ? "Client"
+                                          : "Admin"}
+                                      </div>
+                                    )}
                                   </div>
+                                ) : (
+                                  <span className="text-gray-400">None</span>
                                 )}
-                                {job.assigned_by && (
-                                  <div className="text-xs text-gray-400">
-                                    By:{" "}
-                                    {job.assigned_by === "client"
-                                      ? "Client"
-                                      : "Admin"}
-                                  </div>
+                              </TableCell>
+                              <TableCell>
+                                {!job.is_approved && (
+                                  <Button
+                                    onClick={() => handleApproveJob(job.id)}
+                                    size="sm"
+                                    className="mr-2"
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    Approve
+                                  </Button>
                                 )}
-                              </div>
-                            ) : (
-                              <span className="text-gray-400">None</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {!job.is_approved && (
-                              <Button
-                                onClick={() => handleApproveJob(job.id)}
-                                size="sm"
-                                className="mr-2"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                Approve
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                              </TableCell>
+                            </TableRow>
+                          )
+                      )}
                     </TableBody>
                   </Table>
                 )}
