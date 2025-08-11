@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
+import { PostgrestQueryBuilder } from "@supabase/postgrest-js";
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,8 +10,12 @@ export async function GET(request: NextRequest) {
     const supabase = createClient();
 
     // Get jobs for the client
-    let query = supabase.from("jobs").select(
-      `
+    let query: any = supabase.from("jobs");
+
+    if (userId) {
+      query = query
+        .select(
+          `
         *,
         tradespeople (
           id,
@@ -32,11 +37,31 @@ export async function GET(request: NextRequest) {
           reviewed_at
         )
       `
-    );
-
-    if (userId) {
-      query = query.eq("client_id", userId); // Filter by client_id if userId exists
+        )
+        .eq("client_id", userId);
+    } else {
+      query = query.select(
+        `
+        *,
+         clients (
+          id,
+          email,
+          first_name,
+          last_name
+        ),
+        job_reviews (
+          id,
+          tradesperson_id,
+          reviewer_type,
+          reviewer_id,
+          rating,
+          review_text,
+          reviewed_at
+        )
+      `
+      );
     }
+
     query = query.order("created_at", { ascending: false });
     const { data: jobs, error } = await query;
     if (error) {
