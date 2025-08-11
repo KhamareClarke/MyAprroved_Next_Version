@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseAdmin = createClient(
-  "https://jismdkfjkngwbpddhomx.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imppc21ka2Zqa25nd2JwZGRob214Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjkzNzYzOSwiZXhwIjoyMDY4NTEzNjM5fQ.4CHut9RbSI1vf0z8SGT95Jd8V5CI1LLZMg8Oittd_3Y"
-);
+import { createClient } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
   try {
-    // const supabaseAdmin = supabase();
+    const supabase = createClient();
 
-    // Get all jobs with client information and job reviews
-    const { data: jobs, error } = await supabaseAdmin
-      .from("jobs")
-      .select(
-        `
+    // Get jobs for the client
+    let query: any = supabase.from("jobs");
+
+    query = query.select(
+      `
         *,
-        clients (
+         clients (
           id,
           email,
           first_name,
@@ -32,23 +27,21 @@ export async function GET(request: NextRequest) {
           reviewed_at
         )
       `
-      )
-      .order("created_at", { ascending: false });
+    );
 
+    query = query.order("created_at", { ascending: false });
+    const { data: jobs, error } = await query;
     if (error) {
-      console.error("Error fetching jobs:", error);
+      console.error("Error fetching client jobs:", error);
       return NextResponse.json(
         { error: "Failed to fetch jobs" },
         { status: 500 }
       );
     }
 
-    console.log("Admin jobs API - Jobs found:", jobs?.length || 0);
-    return NextResponse.json({
-      jobs: jobs || [],
-    });
-  } catch (error) {
-    console.error("Error in admin jobs API:", error);
+    return NextResponse.json({ jobs: jobs || [] });
+  } catch (error: any) {
+    console.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
