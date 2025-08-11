@@ -6,20 +6,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
-
     const supabase = createClient();
 
     // Get jobs for the client
-    const { data: jobs, error } = await supabase
-      .from("jobs")
-      .select(
-        `
+    let query = supabase.from("jobs").select(
+      `
         *,
         tradespeople (
           id,
@@ -41,10 +32,13 @@ export async function GET(request: NextRequest) {
           reviewed_at
         )
       `
-      )
-      .eq("client_id", userId)
-      .order("created_at", { ascending: false });
+    );
 
+    if (userId) {
+      query = query.eq("client_id", userId); // Filter by client_id if userId exists
+    }
+    query = query.order("created_at", { ascending: false });
+    const { data: jobs, error } = await query;
     if (error) {
       console.error("Error fetching client jobs:", error);
       return NextResponse.json(

@@ -187,7 +187,7 @@ export default function AdminDashboardPage() {
       }
 
       // Load jobs
-      const jobsResponse = await fetch("/api/admin/jobs");
+      const jobsResponse = await fetch("/api/client/jobs");
       if (jobsResponse.ok) {
         const jobsData = await jobsResponse.json();
         console.log("Admin dashboard - Full jobs response:", jobsData);
