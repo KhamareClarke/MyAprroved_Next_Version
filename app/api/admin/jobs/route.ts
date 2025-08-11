@@ -1,23 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-// import { createClient } from "@/lib/supabase";
+// import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 
-const supabaseAdmin = createClient(
-  "https://jismdkfjkngwbpddhomx.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imppc21ka2Zqa25nd2JwZGRob214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5Mzc2MzksImV4cCI6MjA2ODUxMzYzOX0.1pK4G-Mu5v8lSdDJUAsPsoDAlK9d7ocFaUH9dd2vl3A",
-  {
-    auth: {
-      persistSession: false,
-    },
-  }
-);
+// const supabaseAdmin = createClient(
+//   "https://jismdkfjkngwbpddhomx.supabase.co",
+//   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imppc21ka2Zqa25nd2JwZGRob214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5Mzc2MzksImV4cCI6MjA2ODUxMzYzOX0.1pK4G-Mu5v8lSdDJUAsPsoDAlK9d7ocFaUH9dd2vl3A",
+//   {
+//     auth: {
+//       persistSession: false,
+//     },
+//   }
+// );
 
 export async function GET(request: NextRequest) {
   try {
-    // const supabaseAdmin = createClient();
+    // const supabaseAdmin = supabase();
 
     // Get all jobs with client information and job reviews
-    const { data: jobs, error } = await supabaseAdmin
+    const { data: jobs, error } = await supabase
       .from("jobs")
       .select(
         `
