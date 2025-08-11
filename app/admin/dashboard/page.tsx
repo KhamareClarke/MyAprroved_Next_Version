@@ -543,32 +543,33 @@ export default function AdminDashboardPage() {
                         <TableCell>
                           <div>
                             <div className="font-medium">
-                              {tradesperson.first_name} {tradesperson.last_name}
+                              {tradesperson?.first_name}{" "}
+                              {tradesperson?.last_name}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {tradesperson.email}
+                              {tradesperson?.email}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{tradesperson.trade}</Badge>
+                          <Badge variant="outline">{tradesperson?.trade}</Badge>
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
-                            <div>{tradesperson.phone}</div>
+                            <div>{tradesperson?.phone}</div>
                             <div className="text-gray-500">
-                              {tradesperson.years_experience} years exp.
+                              {tradesperson?.years_experience} years exp.
                             </div>
                             <div className="text-gray-500">
-                              £{tradesperson.hourly_rate}/hr
+                              £{tradesperson?.hourly_rate}/hr
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
-                            <div>{tradesperson.postcode}</div>
+                            <div>{tradesperson?.postcode}</div>
                             <div className="text-gray-500">
-                              {tradesperson.city}
+                              {tradesperson?.city}
                             </div>
                           </div>
                         </TableCell>
@@ -577,12 +578,12 @@ export default function AdminDashboardPage() {
                             <div className="flex items-center gap-2">
                               <Badge
                                 variant={
-                                  tradesperson.is_verified
+                                  tradesperson?.is_verified
                                     ? "default"
                                     : "secondary"
                                 }
                               >
-                                {tradesperson.is_verified
+                                {tradesperson?.is_verified
                                   ? "Verified"
                                   : "Unverified"}
                               </Badge>
@@ -590,12 +591,12 @@ export default function AdminDashboardPage() {
                             <div className="flex items-center gap-2">
                               <Badge
                                 variant={
-                                  tradesperson.is_approved
+                                  tradesperson?.is_approved
                                     ? "default"
                                     : "secondary"
                                 }
                               >
-                                {tradesperson.is_approved
+                                {tradesperson?.is_approved
                                   ? "Approved"
                                   : "Pending"}
                               </Badge>
@@ -603,7 +604,7 @@ export default function AdminDashboardPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {!tradesperson.is_verified && (
+                          {!tradesperson?.is_verified && (
                             <Button
                               onClick={() =>
                                 handleVerifyTradesperson(tradesperson.id)
