@@ -1,19 +1,38 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { LogOut, CheckCircle, XCircle, Eye, Star, Clock } from 'lucide-react';
-import SimpleQuoteRequests from '@/components/SimpleQuoteRequests';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { LogOut, CheckCircle, XCircle, Eye, Star, Clock } from "lucide-react";
+import SimpleQuoteRequests from "@/components/SimpleQuoteRequests";
 
 interface Tradesperson {
   id: string;
@@ -56,7 +75,7 @@ interface Job {
   };
   assigned_tradesperson_id?: string;
   quotation_amount?: number;
-  assigned_by?: 'client' | 'admin';
+  assigned_by?: "client" | "admin";
   is_completed?: boolean;
   completed_at?: string;
   completed_by?: string;
@@ -75,7 +94,7 @@ interface Job {
   job_reviews?: {
     id: string;
     tradesperson_id: string;
-    reviewer_type: 'client' | 'tradesperson';
+    reviewer_type: "client" | "tradesperson";
     reviewer_id: string;
     rating: number;
     review_text: string;
@@ -120,13 +139,14 @@ export default function AdminDashboardPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('tradespeople');
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [activeTab, setActiveTab] = useState("tradespeople");
   const [showAssignmentDialog, setShowAssignmentDialog] = useState(false);
-  const [selectedJobForAssignment, setSelectedJobForAssignment] = useState<any>(null);
-  const [assignmentQuotation, setAssignmentQuotation] = useState('');
-  const [assignmentNotes, setAssignmentNotes] = useState('');
+  const [selectedJobForAssignment, setSelectedJobForAssignment] =
+    useState<any>(null);
+  const [assignmentQuotation, setAssignmentQuotation] = useState("");
+  const [assignmentNotes, setAssignmentNotes] = useState("");
   const [assigning, setAssigning] = useState(false);
   const [availableTradespeople, setAvailableTradespeople] = useState<any[]>([]);
   const [jobApplications, setJobApplications] = useState<any[]>([]);
@@ -134,9 +154,9 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     // Check if admin is logged in
-    const adminLoggedIn = localStorage.getItem('adminLoggedIn');
+    const adminLoggedIn = localStorage.getItem("adminLoggedIn");
     if (!adminLoggedIn) {
-      router.push('/admin/login');
+      router.push("/admin/login");
       return;
     }
 
@@ -145,52 +165,64 @@ export default function AdminDashboardPage() {
 
   // Monitor jobs state changes
   useEffect(() => {
-    console.log('Admin dashboard - Jobs state changed:', {
+    console.log("Admin dashboard - Jobs state changed:", {
       jobsLength: jobs.length,
-      jobs: jobs
+      jobs: jobs,
     });
   }, [jobs]);
 
   const loadData = async () => {
     try {
-      console.log('Admin dashboard - Loading data...');
-      
+      console.log("Admin dashboard - Loading data...");
+
       // Load tradespeople
-      const tradespeopleResponse = await fetch('/api/admin/tradespeople');
+      const tradespeopleResponse = await fetch("/api/admin/tradespeople");
       if (tradespeopleResponse.ok) {
         const tradespeopleData = await tradespeopleResponse.json();
-        console.log('Admin dashboard - Tradespeople loaded:', tradespeopleData.tradespeople?.length || 0);
+        console.log(
+          "Admin dashboard - Tradespeople loaded:",
+          tradespeopleData.tradespeople?.length || 0
+        );
         setTradespeople(tradespeopleData.tradespeople);
       }
 
       // Load jobs
-      const jobsResponse = await fetch('/api/admin/jobs');
+      const jobsResponse = await fetch("/api/admin/jobs");
       if (jobsResponse.ok) {
         const jobsData = await jobsResponse.json();
-        console.log('Admin dashboard - Full jobs response:', jobsData);
-        console.log('Admin dashboard - Jobs loaded:', jobsData.jobs?.length || 0);
-        console.log('Admin dashboard - Jobs data:', jobsData.jobs);
-        
+        console.log("Admin dashboard - Full jobs response:", jobsData);
+        console.log(
+          "Admin dashboard - Jobs loaded:",
+          jobsData.jobs?.length || 0
+        );
+        console.log("Admin dashboard - Jobs data:", jobsData.jobs);
+
         // Handle both possible response structures
         const jobsArray = jobsData.jobs || jobsData || [];
-        console.log('Admin dashboard - Final jobs array:', jobsArray);
+        console.log("Admin dashboard - Final jobs array:", jobsArray);
         setJobs(jobsArray);
       } else {
-        console.error('Admin dashboard - Failed to load jobs:', jobsResponse.status);
+        console.error(
+          "Admin dashboard - Failed to load jobs:",
+          jobsResponse.status
+        );
         const errorText = await jobsResponse.text();
-        console.error('Admin dashboard - Error response:', errorText);
+        console.error("Admin dashboard - Error response:", errorText);
       }
 
       // Load job applications
-      const applicationsResponse = await fetch('/api/admin/job-applications');
+      const applicationsResponse = await fetch("/api/admin/job-applications");
       if (applicationsResponse.ok) {
         const applicationsData = await applicationsResponse.json();
-        console.log('Admin dashboard - Applications loaded:', applicationsData.applications?.length || 0);
+        console.log(
+          "Admin dashboard - Applications loaded:",
+          applicationsData.applications?.length || 0
+        );
         setApplications(applicationsData.applications);
       }
     } catch (err) {
-      console.error('Admin dashboard - Error loading data:', err);
-      setError('Error loading data');
+      console.error("Admin dashboard - Error loading data:", err);
+      setError("Error loading data");
     } finally {
       setLoading(false);
     }
@@ -198,10 +230,10 @@ export default function AdminDashboardPage() {
 
   const handleVerifyTradesperson = async (tradespersonId: string) => {
     try {
-      const response = await fetch('/api/admin/verify-tradesperson', {
-        method: 'POST',
+      const response = await fetch("/api/admin/verify-tradesperson", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ tradespersonId }),
       });
@@ -209,22 +241,22 @@ export default function AdminDashboardPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Tradesperson verified successfully!');
+        setMessage("Tradesperson verified successfully!");
         loadData(); // Reload data
       } else {
-        setError(data.error || 'Failed to verify tradesperson');
+        setError(data.error || "Failed to verify tradesperson");
       }
     } catch (err) {
-      setError('Error verifying tradesperson');
+      setError("Error verifying tradesperson");
     }
   };
 
   const handleApproveJob = async (jobId: string) => {
     try {
-      const response = await fetch('/api/admin/approve-job', {
-        method: 'POST',
+      const response = await fetch("/api/admin/approve-job", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ jobId }),
       });
@@ -232,22 +264,25 @@ export default function AdminDashboardPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Job approved successfully!');
+        setMessage("Job approved successfully!");
         loadData(); // Reload data
       } else {
-        setError(data.error || 'Failed to approve job');
+        setError(data.error || "Failed to approve job");
       }
     } catch (err) {
-      setError('Error approving job');
+      setError("Error approving job");
     }
   };
 
-  const handleApproveQuotation = async (applicationId: string, action: 'approve' | 'reject') => {
+  const handleApproveQuotation = async (
+    applicationId: string,
+    action: "approve" | "reject"
+  ) => {
     try {
-      const response = await fetch('/api/admin/approve-quotation', {
-        method: 'POST',
+      const response = await fetch("/api/admin/approve-quotation", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ applicationId, action }),
       });
@@ -265,29 +300,37 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const loadAvailableTradespeople = async (jobTrade: string, jobPostcode: string) => {
+  const loadAvailableTradespeople = async (
+    jobTrade: string,
+    jobPostcode: string
+  ) => {
     try {
-      const { data: tradespeople, error } = await fetch('/api/admin/tradespeople').then(res => res.json());
+      const { data: tradespeople, error } = await fetch(
+        "/api/admin/tradespeople"
+      ).then((res) => res.json());
 
       if (error) {
-        console.error('Error loading tradespeople:', error);
+        console.error("Error loading tradespeople:", error);
         return;
       }
 
       // Filter by trade and location
-      const filteredTradespeople = tradespeople?.filter((tp: any) => {
-        return tp.trade === jobTrade && tp.is_approved && tp.is_verified;
-      }) || [];
+      const filteredTradespeople =
+        tradespeople?.filter((tp: any) => {
+          return tp.trade === jobTrade && tp.is_approved && tp.is_verified;
+        }) || [];
 
       setAvailableTradespeople(filteredTradespeople);
     } catch (err) {
-      console.error('Error in loadAvailableTradespeople:', err);
+      console.error("Error in loadAvailableTradespeople:", err);
     }
   };
 
   const loadJobApplications = async (jobId: string) => {
     try {
-      const { data, error } = await fetch('/api/admin/job-applications').then(res => res.json());
+      const { data, error } = await fetch("/api/admin/job-applications").then(
+        (res) => res.json()
+      );
       if (!error) setJobApplications(data || []);
       else setJobApplications([]);
     } catch (err) {
@@ -296,8 +339,10 @@ export default function AdminDashboardPage() {
   };
 
   const handleAssignJob = (job: any) => {
-    if (job.assigned_by === 'client') {
-      setError('This job is already assigned by client. Admin cannot reassign.');
+    if (job.assigned_by === "client") {
+      setError(
+        "This job is already assigned by client. Admin cannot reassign."
+      );
       return;
     }
     setSelectedJobForAssignment(job);
@@ -308,32 +353,32 @@ export default function AdminDashboardPage() {
 
   const submitAssignment = async (application: any) => {
     if (!selectedJobForAssignment) {
-      setError('Please select an application');
+      setError("Please select an application");
       return;
     }
     setAssigning(true);
-    setError('');
+    setError("");
     try {
-      const response = await fetch('/api/admin/assign-job', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/admin/assign-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           jobId: selectedJobForAssignment.id,
           tradespersonId: application.tradespeople.id,
           quotationAmount: application.quotation_amount,
-          quotationNotes: application.quotation_notes
+          quotationNotes: application.quotation_notes,
         }),
       });
       const data = await response.json();
       if (response.ok) {
-        setMessage('Job assigned successfully!');
+        setMessage("Job assigned successfully!");
         setShowAssignmentDialog(false);
         loadData();
       } else {
-        setError(data.error || 'Failed to assign job');
+        setError(data.error || "Failed to assign job");
       }
     } catch (err) {
-      setError('Error assigning job');
+      setError("Error assigning job");
     } finally {
       setAssigning(false);
     }
@@ -345,7 +390,9 @@ export default function AdminDashboardPage() {
       stars.push(
         <Star
           key={i}
-          className={`w-4 h-4 ${i <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+          className={`w-4 h-4 ${
+            i <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
+          }`}
         />
       );
     }
@@ -353,8 +400,8 @@ export default function AdminDashboardPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminLoggedIn');
-    router.push('/admin/login');
+    localStorage.removeItem("adminLoggedIn");
+    router.push("/admin/login");
   };
 
   if (loading) {
@@ -369,26 +416,24 @@ export default function AdminDashboardPage() {
   }
 
   // Filter jobs by status
-  const pendingJobs = jobs.filter(job => !job.is_approved);
-  const availableJobs = jobs.filter(job => 
-    job.is_approved && 
-    !job.assigned_tradesperson_id && 
-    !job.is_completed
+  const pendingJobs = jobs.filter((job) => !job.is_approved);
+  const availableJobs = jobs.filter(
+    (job) =>
+      job.is_approved && !job.assigned_tradesperson_id && !job.is_completed
   );
-  const inProgressJobs = jobs.filter(job => 
-    job.assigned_tradesperson_id && 
-    !job.is_completed
+  const inProgressJobs = jobs.filter(
+    (job) => job.assigned_tradesperson_id && !job.is_completed
   );
-  const completedJobs = jobs.filter(job => job.is_completed);
+  const completedJobs = jobs.filter((job) => job.is_completed);
 
   // Debug logging
-  console.log('Admin dashboard - Jobs state:', {
+  console.log("Admin dashboard - Jobs state:", {
     totalJobs: jobs.length,
     pendingJobs: pendingJobs.length,
     availableJobs: availableJobs.length,
     inProgressJobs: inProgressJobs.length,
     completedJobs: completedJobs.length,
-    jobsData: jobs
+    jobsData: jobs,
   });
 
   return (
@@ -397,8 +442,12 @@ export default function AdminDashboardPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600">Manage tradespeople, jobs, and applications</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600">
+              Manage tradespeople, jobs, and applications
+            </p>
           </div>
           <Button onClick={handleLogout} variant="outline">
             <LogOut className="w-4 h-4 mr-2" />
@@ -430,25 +479,35 @@ export default function AdminDashboardPage() {
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-yellow-600">{pendingJobs.length}</div>
+              <div className="text-2xl font-bold text-yellow-600">
+                {pendingJobs.length}
+              </div>
               <div className="text-sm text-gray-600">Pending Jobs</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-blue-600">{inProgressJobs.length}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {inProgressJobs.length}
+              </div>
               <div className="text-sm text-gray-600">In Progress</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-green-600">{completedJobs.length}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {completedJobs.length}
+              </div>
               <div className="text-sm text-gray-600">Completed</div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList>
             <TabsTrigger value="tradespeople">Tradespeople</TabsTrigger>
             <TabsTrigger value="jobs">Jobs</TabsTrigger>
@@ -486,7 +545,9 @@ export default function AdminDashboardPage() {
                             <div className="font-medium">
                               {tradesperson.first_name} {tradesperson.last_name}
                             </div>
-                            <div className="text-sm text-gray-500">{tradesperson.email}</div>
+                            <div className="text-sm text-gray-500">
+                              {tradesperson.email}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -495,26 +556,48 @@ export default function AdminDashboardPage() {
                         <TableCell>
                           <div className="text-sm">
                             <div>{tradesperson.phone}</div>
-                            <div className="text-gray-500">{tradesperson.years_experience} years exp.</div>
-                            <div className="text-gray-500">£{tradesperson.hourly_rate}/hr</div>
+                            <div className="text-gray-500">
+                              {tradesperson.years_experience} years exp.
+                            </div>
+                            <div className="text-gray-500">
+                              £{tradesperson.hourly_rate}/hr
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
                             <div>{tradesperson.postcode}</div>
-                            <div className="text-gray-500">{tradesperson.city}</div>
+                            <div className="text-gray-500">
+                              {tradesperson.city}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <Badge variant={tradesperson.is_verified ? "default" : "secondary"}>
-                                {tradesperson.is_verified ? "Verified" : "Unverified"}
+                              <Badge
+                                variant={
+                                  tradesperson.is_verified
+                                    ? "default"
+                                    : "secondary"
+                                }
+                              >
+                                {tradesperson.is_verified
+                                  ? "Verified"
+                                  : "Unverified"}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant={tradesperson.is_approved ? "default" : "secondary"}>
-                                {tradesperson.is_approved ? "Approved" : "Pending"}
+                              <Badge
+                                variant={
+                                  tradesperson.is_approved
+                                    ? "default"
+                                    : "secondary"
+                                }
+                              >
+                                {tradesperson.is_approved
+                                  ? "Approved"
+                                  : "Pending"}
                               </Badge>
                             </div>
                           </div>
@@ -522,7 +605,9 @@ export default function AdminDashboardPage() {
                         <TableCell>
                           {!tradesperson.is_verified && (
                             <Button
-                              onClick={() => handleVerifyTradesperson(tradesperson.id)}
+                              onClick={() =>
+                                handleVerifyTradesperson(tradesperson.id)
+                              }
                               size="sm"
                               className="mr-2"
                             >
@@ -556,9 +641,17 @@ export default function AdminDashboardPage() {
                 {jobs.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500 mb-4">No jobs found</p>
-                    <p className="text-sm text-gray-400">Jobs loaded: {jobs.length}</p>
-                    <p className="text-sm text-gray-400">Loading: {loading ? 'Yes' : 'No'}</p>
-                    <Button onClick={loadData} variant="outline" className="mt-2">
+                    <p className="text-sm text-gray-400">
+                      Jobs loaded: {jobs.length}
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      Loading: {loading ? "Yes" : "No"}
+                    </p>
+                    <Button
+                      onClick={loadData}
+                      variant="outline"
+                      className="mt-2"
+                    >
                       Refresh Data
                     </Button>
                   </div>
@@ -583,32 +676,44 @@ export default function AdminDashboardPage() {
                               <div className="font-medium">
                                 {job.clients.first_name} {job.clients.last_name}
                               </div>
-                              <div className="text-sm text-gray-500">{job.clients.email}</div>
+                              <div className="text-sm text-gray-500">
+                                {job.clients.email}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline">{job.trade}</Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="max-w-xs truncate" title={job.job_description}>
+                            <div
+                              className="max-w-xs truncate"
+                              title={job.job_description}
+                            >
                               {job.job_description}
                             </div>
                           </TableCell>
                           <TableCell>{job.postcode}</TableCell>
                           <TableCell>
-                            £{job.budget || 'Not specified'} ({job.budget_type})
+                            £{job.budget || "Not specified"} ({job.budget_type})
                           </TableCell>
                           <TableCell>
                             {job.assigned_tradesperson_id ? (
                               <div className="text-sm">
                                 <div className="font-medium">Assigned</div>
-                                <div className="text-gray-500">ID: {job.assigned_tradesperson_id}</div>
+                                <div className="text-gray-500">
+                                  ID: {job.assigned_tradesperson_id}
+                                </div>
                                 {job.quotation_amount && (
-                                  <div className="text-green-600">£{job.quotation_amount}</div>
+                                  <div className="text-green-600">
+                                    £{job.quotation_amount}
+                                  </div>
                                 )}
                                 {job.assigned_by && (
                                   <div className="text-xs text-gray-400">
-                                    By: {job.assigned_by === 'client' ? 'Client' : 'Admin'}
+                                    By:{" "}
+                                    {job.assigned_by === "client"
+                                      ? "Client"
+                                      : "Admin"}
                                   </div>
                                 )}
                               </div>
@@ -663,52 +768,83 @@ export default function AdminDashboardPage() {
                       <TableRow key={application.id}>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{application.jobs.trade}</div>
-                            <div className="text-sm text-gray-600 max-w-xs truncate" title={application.jobs.job_description}>
+                            <div className="font-medium">
+                              {application.jobs.trade}
+                            </div>
+                            <div
+                              className="text-sm text-gray-600 max-w-xs truncate"
+                              title={application.jobs.job_description}
+                            >
                               {application.jobs.job_description}
                             </div>
-                            <div className="text-sm text-gray-500">{application.jobs.postcode}</div>
+                            <div className="text-sm text-gray-500">
+                              {application.jobs.postcode}
+                            </div>
                             <div className="text-xs text-gray-400">
-                              Client: {application.jobs.clients.first_name} {application.jobs.clients.last_name}
+                              Client: {application.jobs.clients.first_name}{" "}
+                              {application.jobs.clients.last_name}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium">
-                              {application.tradespeople.first_name} {application.tradespeople.last_name}
+                              {application.tradespeople.first_name}{" "}
+                              {application.tradespeople.last_name}
                             </div>
-                            <div className="text-sm text-gray-500">{application.tradespeople.trade}</div>
-                            <div className="text-sm text-gray-500">{application.tradespeople.years_experience} years exp.</div>
-                            <div className="text-xs text-gray-400">£{application.tradespeople.hourly_rate}/hr</div>
+                            <div className="text-sm text-gray-500">
+                              {application.tradespeople.trade}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {application.tradespeople.years_experience} years
+                              exp.
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              £{application.tradespeople.hourly_rate}/hr
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-bold text-lg">£{application.quotation_amount}</div>
+                            <div className="font-bold text-lg">
+                              £{application.quotation_amount}
+                            </div>
                             {application.quotation_notes && (
                               <div className="text-sm text-gray-600 mt-1">
-                                "{application.quotation_notes}"
+                                {application.quotation_notes}
                               </div>
                             )}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={
-                            application.status === 'pending' ? 'secondary' : 
-                            application.status === 'accepted' ? 'default' : 'destructive'
-                          }>
-                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                          <Badge
+                            variant={
+                              application.status === "pending"
+                                ? "secondary"
+                                : application.status === "accepted"
+                                ? "default"
+                                : "destructive"
+                            }
+                          >
+                            {application.status.charAt(0).toUpperCase() +
+                              application.status.slice(1)}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {new Date(application.applied_at).toLocaleDateString()}
+                          {new Date(
+                            application.applied_at
+                          ).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          {application.status === 'pending' && (
+                          {application.status === "pending" && (
                             <div className="space-y-1">
                               <Button
-                                onClick={() => handleApproveQuotation(application.id, 'approve')}
+                                onClick={() =>
+                                  handleApproveQuotation(
+                                    application.id,
+                                    "approve"
+                                  )
+                                }
                                 size="sm"
                                 className="w-full"
                               >
@@ -716,7 +852,12 @@ export default function AdminDashboardPage() {
                                 Approve
                               </Button>
                               <Button
-                                onClick={() => handleApproveQuotation(application.id, 'reject')}
+                                onClick={() =>
+                                  handleApproveQuotation(
+                                    application.id,
+                                    "reject"
+                                  )
+                                }
                                 variant="destructive"
                                 size="sm"
                                 className="w-full"
@@ -767,10 +908,15 @@ export default function AdminDashboardPage() {
                         <TableCell>
                           <div>
                             <div className="font-medium">{job.trade}</div>
-                            <div className="text-sm text-gray-600 max-w-xs truncate" title={job.job_description}>
+                            <div
+                              className="text-sm text-gray-600 max-w-xs truncate"
+                              title={job.job_description}
+                            >
                               {job.job_description}
                             </div>
-                            <div className="text-sm text-gray-500">{job.postcode}</div>
+                            <div className="text-sm text-gray-500">
+                              {job.postcode}
+                            </div>
                             <div className="text-xs text-gray-400">
                               Completed by: {job.completed_by}
                             </div>
@@ -780,9 +926,12 @@ export default function AdminDashboardPage() {
                           {job.tradespeople ? (
                             <div>
                               <div className="font-medium">
-                                {job.tradespeople.first_name} {job.tradespeople.last_name}
+                                {job.tradespeople.first_name}{" "}
+                                {job.tradespeople.last_name}
                               </div>
-                              <div className="text-sm text-gray-500">{job.tradespeople.trade}</div>
+                              <div className="text-sm text-gray-500">
+                                {job.tradespeople.trade}
+                              </div>
                             </div>
                           ) : (
                             <span className="text-gray-400">N/A</span>
@@ -793,7 +942,9 @@ export default function AdminDashboardPage() {
                             <div className="font-medium">
                               {job.clients.first_name} {job.clients.last_name}
                             </div>
-                            <div className="text-sm text-gray-500">{job.clients.email}</div>
+                            <div className="text-sm text-gray-500">
+                              {job.clients.email}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -803,14 +954,22 @@ export default function AdminDashboardPage() {
                           {job.job_reviews && job.job_reviews.length > 0 ? (
                             <div className="space-y-2">
                               {job.job_reviews.map((review: any) => (
-                                <div key={review.id} className="border-l-2 border-blue-200 pl-2">
+                                <div
+                                  key={review.id}
+                                  className="border-l-2 border-blue-200 pl-2"
+                                >
                                   <div className="flex items-center gap-2">
                                     {renderStars(review.rating)}
-                                    <span className="text-sm">({review.rating}/5)</span>
+                                    <span className="text-sm">
+                                      ({review.rating}/5)
+                                    </span>
                                   </div>
                                   {review.review_text && (
-                                    <div className="text-xs text-gray-600 mt-1 max-w-xs truncate" title={review.review_text}>
-                                      "{review.review_text}"
+                                    <div
+                                      className="text-xs text-gray-600 mt-1 max-w-xs truncate"
+                                      title={review.review_text}
+                                    >
+                                      {review.review_text}
                                     </div>
                                   )}
                                 </div>
@@ -824,8 +983,12 @@ export default function AdminDashboardPage() {
                           {job.job_reviews && job.job_reviews.length > 0 ? (
                             <div className="space-y-1">
                               {job.job_reviews.map((review: any) => (
-                                <div key={review.id} className="text-sm text-gray-600 max-w-xs truncate" title={review.review_text}>
-                                  {review.review_text || 'No review text'}
+                                <div
+                                  key={review.id}
+                                  className="text-sm text-gray-600 max-w-xs truncate"
+                                  title={review.review_text}
+                                >
+                                  {review.review_text || "No review text"}
                                 </div>
                               ))}
                             </div>
@@ -843,34 +1006,53 @@ export default function AdminDashboardPage() {
         </Tabs>
 
         {/* Assignment Dialog */}
-        <Dialog open={showAssignmentDialog} onOpenChange={setShowAssignmentDialog}>
+        <Dialog
+          open={showAssignmentDialog}
+          onOpenChange={setShowAssignmentDialog}
+        >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Assign Job to Tradesperson</DialogTitle>
               <DialogDescription>
-                Select a tradesperson who has applied to this job. Their quotation and notes are shown below.
+                Select a tradesperson who has applied to this job. Their
+                quotation and notes are shown below.
               </DialogDescription>
             </DialogHeader>
             {selectedJobForAssignment && (
               <div className="space-y-4">
                 <div className="bg-gray-50 p-3 rounded">
                   <h4 className="font-semibold mb-2">Job Details:</h4>
-                  <p className="text-sm text-gray-600">{selectedJobForAssignment.job_description}</p>
-                  <p className="text-sm text-gray-600">Trade: {selectedJobForAssignment.trade}</p>
-                  <p className="text-sm text-gray-600">Location: {selectedJobForAssignment.postcode}</p>
-                  <p className="text-sm text-gray-600">Client: {selectedJobForAssignment.clients.first_name} {selectedJobForAssignment.clients.last_name}</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedJobForAssignment.job_description}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Trade: {selectedJobForAssignment.trade}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Location: {selectedJobForAssignment.postcode}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Client: {selectedJobForAssignment.clients.first_name}{" "}
+                    {selectedJobForAssignment.clients.last_name}
+                  </p>
                 </div>
                 <div>
                   <Label>Applicants:</Label>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {jobApplications.length === 0 ? (
-                      <p className="text-sm text-gray-500">No tradespeople have applied for this job yet.</p>
+                      <p className="text-sm text-gray-500">
+                        No tradespeople have applied for this job yet.
+                      </p>
                     ) : (
                       jobApplications.map((app) => (
                         <div key={app.id} className="border p-2 rounded">
-                          <div className="font-medium">{app.tradespeople.first_name} {app.tradespeople.last_name}</div>
+                          <div className="font-medium">
+                            {app.tradespeople.first_name}{" "}
+                            {app.tradespeople.last_name}
+                          </div>
                           <div className="text-sm text-gray-600">
-                            Experience: {app.tradespeople.years_experience} years | Rate: £{app.tradespeople.hourly_rate}/hr
+                            Experience: {app.tradespeople.years_experience}{" "}
+                            years | Rate: £{app.tradespeople.hourly_rate}/hr
                           </div>
                           <div className="text-sm text-gray-600 mt-1">
                             <strong>Quotation:</strong> £{app.quotation_amount}
@@ -886,7 +1068,9 @@ export default function AdminDashboardPage() {
                             size="sm"
                             className="mt-2"
                           >
-                            {assigning ? 'Assigning...' : 'Assign to This Tradesperson'}
+                            {assigning
+                              ? "Assigning..."
+                              : "Assign to This Tradesperson"}
                           </Button>
                         </div>
                       ))
@@ -894,8 +1078,8 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => setShowAssignmentDialog(false)}
                     disabled={assigning}
                     className="flex-1"
@@ -910,4 +1094,4 @@ export default function AdminDashboardPage() {
       </div>
     </div>
   );
-} 
+}
