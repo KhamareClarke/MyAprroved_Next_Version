@@ -47,7 +47,7 @@ export default function AdminQuoteRequests() {
   const fetchQuoteRequests = async () => {
     try {
       console.log("AdminQuoteRequests: Fetching quote requests...");
-      const response = await fetch("/api/admin-secret/quote-requests");
+      const response = await fetch("/api/client/admin-secret/quote-requests");
       const data = await response.json();
       console.log("AdminQuoteRequests: API response:", data);
 
@@ -75,7 +75,7 @@ export default function AdminQuoteRequests() {
   ) => {
     try {
       setLoading(true); // Show loading state
-      const response = await fetch("/api/admin-secret/approve-quote", {
+      const response = await fetch("/api/client/admin-secret/approve-quote", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

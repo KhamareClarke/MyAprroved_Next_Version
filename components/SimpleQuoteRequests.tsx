@@ -37,7 +37,7 @@ export default function SimpleQuoteRequests() {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/admin-secret/quote-requests?ts=${Date.now()}`,
+        `/api/client/admin-secret/quote-requests?ts=${Date.now()}`,
         {
           cache: "no-store",
         } as RequestInit
@@ -62,7 +62,7 @@ export default function SimpleQuoteRequests() {
   ) => {
     try {
       setLoading(true);
-      const response = await fetch("/api/admin-secret/approve-quote", {
+      const response = await fetch("/api/client/admin-secret/approve-quote", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
