@@ -956,30 +956,30 @@ export default function ClientDashboardPage() {
                             <TableCell>
                               <div>
                                 <div className="font-medium">
-                                  {application.jobs.trade}
+                                  {application?.jobs?.trade}
                                 </div>
                                 <div
                                   className="text-sm text-gray-600 max-w-xs truncate"
-                                  title={application.jobs.job_description}
+                                  title={application?.jobs?.job_description}
                                 >
-                                  {application.jobs.job_description}
+                                  {application?.jobs?.job_description}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {application.jobs.postcode}
+                                  {application?.jobs?.postcode}
                                 </div>
                               </div>
                             </TableCell>
                             <TableCell>
                               <div>
                                 <div className="font-medium">
-                                  {application.tradespeople.first_name}{" "}
-                                  {application.tradespeople.last_name}
+                                  {application?.tradespeople?.first_name}{" "}
+                                  {application?.tradespeople?.last_name}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {application.tradespeople.trade}
+                                  {application?.tradespeople?.trade}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {application.tradespeople.years_experience}{" "}
+                                  {application?.tradespeople.years_experience}{" "}
                                   years exp.
                                 </div>
                                 <div className="text-xs text-gray-400">
