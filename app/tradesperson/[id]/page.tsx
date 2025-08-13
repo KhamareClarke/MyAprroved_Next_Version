@@ -49,7 +49,7 @@ export default function TradespersonProfile() {
     const fetchTradesperson = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/tradespeopleeeee/${params.id}`);
+        const response = await fetch(`/api/trade-data/${params.id}`);
         const data = await response.json();
 
         if (data.success) {

@@ -223,7 +223,7 @@ export default function TradespersonDashboardPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/tradespeopleeeee/${userId}`);
+      const response = await fetch(`/api/trade-data/${userId}`);
       const data = await response.json();
 
       if (response.ok) {
