@@ -87,7 +87,7 @@ export default function FindTradespeople() {
       params.append("page", page.toString());
       params.append("limit", pagination.limit.toString());
 
-      const response = await fetch(`/api/tradespeople/list?${params}`);
+      const response = await fetch(`/api/tradespeopleeeee/list?${params}`);
       const data = await response.json();
 
       console.log("Frontend received data:", data);

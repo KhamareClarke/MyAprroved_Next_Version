@@ -1,151 +1,189 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
-import { supabase } from '@/lib/supabase-client';
-import { Upload, FileText, Shield, Award, CreditCard, AlertCircle } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/lib/supabase-client";
+import {
+  Upload,
+  FileText,
+  Shield,
+  Award,
+  CreditCard,
+  AlertCircle,
+} from "lucide-react";
 
 interface TradespersonRegistrationFormProps {
   onRegistrationComplete?: () => void;
 }
 
-export default function TradespersonRegistrationForm({ onRegistrationComplete }: TradespersonRegistrationFormProps) {
+export default function TradespersonRegistrationForm({
+  onRegistrationComplete,
+}: TradespersonRegistrationFormProps) {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    phone: '',
-    postcode: '',
-    city: '',
-    address: '',
-    trade: '',
-    yearsExperience: '',
-    hourlyRate: '',
-    acceptTerms: false
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    postcode: "",
+    city: "",
+    address: "",
+    trade: "",
+    yearsExperience: "",
+    hourlyRate: "",
+    acceptTerms: false,
   });
 
   const [documents, setDocuments] = useState({
     idDocument: null as File | null,
     insuranceDocument: null as File | null,
     qualificationsDocument: null as File | null,
-    tradeCardDocument: null as File | null
+    tradeCardDocument: null as File | null,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const tradeOptions = [
-    'Plumbing',
-    'Electrical',
-    'Carpentry',
-    'Painting & Decorating',
-    'Roofing',
-    'Heating & Ventilation',
-    'Air Conditioning',
-    'Garden & Landscaping',
-    'Cleaning',
-    'Carpet & Flooring',
-    'Kitchen & Bathroom',
-    'General Handyman',
-    'Other'
+    "Plumbing",
+    "Electrical",
+    "Carpentry",
+    "Painting & Decorating",
+    "Roofing",
+    "Heating & Ventilation",
+    "Air Conditioning",
+    "Garden & Landscaping",
+    "Cleaning",
+    "Carpet & Flooring",
+    "Kitchen & Bathroom",
+    "General Handyman",
+    "Other",
   ];
 
   // Trades that require trade card
-  const tradesRequiringTradeCard = ['Plumbing', 'Electrical', 'Air Conditioning'];
+  const tradesRequiringTradeCard = [
+    "Plumbing",
+    "Electrical",
+    "Air Conditioning",
+  ];
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleDocumentUpload = (field: string, file: File | null) => {
-    setDocuments(prev => ({
+    setDocuments((prev) => ({
       ...prev,
-      [field]: file
+      [field]: file,
     }));
   };
 
-  const uploadDocument = async (file: File, folder: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
+  const uploadDocument = async (
+    file: File,
+    folder: string
+  ): Promise<string> => {
+    const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('tradesperson-documents')
+      .from("tradesperson-documents")
       .upload(filePath, file);
 
     if (uploadError) {
       throw new Error(`Failed to upload ${folder}: ${uploadError.message}`);
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('tradesperson-documents')
-      .getPublicUrl(filePath);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("tradesperson-documents").getPublicUrl(filePath);
 
     return publicUrl;
   };
 
   const validateForm = () => {
-    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
-      throw new Error('Please fill in all required fields');
+    if (
+      !formData.email ||
+      !formData.password ||
+      !formData.firstName ||
+      !formData.lastName
+    ) {
+      throw new Error("Please fill in all required fields");
     }
 
     if (formData.password !== formData.confirmPassword) {
-      throw new Error('Passwords do not match');
+      throw new Error("Passwords do not match");
     }
 
     if (formData.password.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
+      throw new Error("Password must be at least 8 characters long");
     }
 
     if (!formData.postcode || !formData.city) {
-      throw new Error('Please provide postcode and city');
+      throw new Error("Please provide postcode and city");
     }
 
     if (!formData.trade) {
-      throw new Error('Please select your trade');
+      throw new Error("Please select your trade");
     }
 
     if (!formData.acceptTerms) {
-      throw new Error('Please accept the terms and conditions');
+      throw new Error("Please accept the terms and conditions");
     }
 
     // Check required documents
     if (!documents.idDocument) {
-      throw new Error('ID document is required');
+      throw new Error("ID document is required");
     }
 
     if (!documents.insuranceDocument) {
-      throw new Error('Insurance document is required');
+      throw new Error("Insurance document is required");
     }
 
     if (!documents.qualificationsDocument) {
-      throw new Error('Proof of qualifications is required');
+      throw new Error("Proof of qualifications is required");
     }
 
     // Check trade card requirement
-    if (tradesRequiringTradeCard.includes(formData.trade) && !documents.tradeCardDocument) {
-      throw new Error(`Trade card is required for ${formData.trade} professionals`);
+    if (
+      tradesRequiringTradeCard.includes(formData.trade) &&
+      !documents.tradeCardDocument
+    ) {
+      throw new Error(
+        `Trade card is required for ${formData.trade} professionals`
+      );
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       // Validate form
@@ -153,19 +191,28 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
 
       // Upload all documents
       const documentUrls = {
-        idDocumentUrl: await uploadDocument(documents.idDocument!, 'id-documents'),
-        insuranceDocumentUrl: await uploadDocument(documents.insuranceDocument!, 'insurance-documents'),
-        qualificationsDocumentUrl: await uploadDocument(documents.qualificationsDocument!, 'qualifications-documents'),
-        tradeCardUrl: documents.tradeCardDocument 
-          ? await uploadDocument(documents.tradeCardDocument, 'trade-cards')
-          : null
+        idDocumentUrl: await uploadDocument(
+          documents.idDocument!,
+          "id-documents"
+        ),
+        insuranceDocumentUrl: await uploadDocument(
+          documents.insuranceDocument!,
+          "insurance-documents"
+        ),
+        qualificationsDocumentUrl: await uploadDocument(
+          documents.qualificationsDocument!,
+          "qualifications-documents"
+        ),
+        tradeCardUrl: documents.tradeCardDocument
+          ? await uploadDocument(documents.tradeCardDocument, "trade-cards")
+          : null,
       };
 
       // Create tradesperson account
-      const response = await fetch('/api/tradespeople/register', {
-        method: 'POST',
+      const response = await fetch("/api/tradespeopleeeee/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: formData.email,
@@ -177,51 +224,56 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
           city: formData.city,
           address: formData.address,
           trade: formData.trade,
-          yearsExperience: formData.yearsExperience ? parseInt(formData.yearsExperience) : null,
-          hourlyRate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
-          ...documentUrls
+          yearsExperience: formData.yearsExperience
+            ? parseInt(formData.yearsExperience)
+            : null,
+          hourlyRate: formData.hourlyRate
+            ? parseFloat(formData.hourlyRate)
+            : null,
+          ...documentUrls,
         }),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to register');
+        throw new Error(result.error || "Failed to register");
       }
 
-      setSuccess('Registration submitted successfully! Your account will be reviewed and approved by our team.');
-      
+      setSuccess(
+        "Registration submitted successfully! Your account will be reviewed and approved by our team."
+      );
+
       // Reset form
       setFormData({
-        email: '',
-        password: '',
-        confirmPassword: '',
-        firstName: '',
-        lastName: '',
-        phone: '',
-        postcode: '',
-        city: '',
-        address: '',
-        trade: '',
-        yearsExperience: '',
-        hourlyRate: '',
-        acceptTerms: false
+        email: "",
+        password: "",
+        confirmPassword: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+        postcode: "",
+        city: "",
+        address: "",
+        trade: "",
+        yearsExperience: "",
+        hourlyRate: "",
+        acceptTerms: false,
       });
 
       setDocuments({
         idDocument: null,
         insuranceDocument: null,
         qualificationsDocument: null,
-        tradeCardDocument: null
+        tradeCardDocument: null,
       });
 
       // Call callback if provided
       if (onRegistrationComplete) {
         onRegistrationComplete();
       }
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to register');
+      setError(err instanceof Error ? err.message : "Failed to register");
     } finally {
       setIsSubmitting(false);
     }
@@ -232,7 +284,8 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
       <CardHeader>
         <CardTitle>Tradesperson Registration</CardTitle>
         <CardDescription>
-          Join our network of qualified tradespeople. Please provide all required information and documents.
+          Join our network of qualified tradespeople. Please provide all
+          required information and documents.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -243,7 +296,7 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           {success && (
             <Alert>
               <AlertDescription>{success}</AlertDescription>
@@ -259,7 +312,9 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
                   required
                 />
               </div>
@@ -268,7 +323,9 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
                   required
                 />
               </div>
@@ -281,7 +338,7 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
                   required
                 />
               </div>
@@ -291,7 +348,7 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                   id="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
                 />
               </div>
             </div>
@@ -301,7 +358,7 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
               <Textarea
                 id="address"
                 value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
+                onChange={(e) => handleInputChange("address", e.target.value)}
                 rows={2}
               />
             </div>
@@ -312,7 +369,9 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                 <Input
                   id="postcode"
                   value={formData.postcode}
-                  onChange={(e) => handleInputChange('postcode', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("postcode", e.target.value)
+                  }
                   required
                 />
               </div>
@@ -321,7 +380,7 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                 <Input
                   id="city"
                   value={formData.city}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  onChange={(e) => handleInputChange("city", e.target.value)}
                   required
                 />
               </div>
@@ -334,7 +393,10 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="trade">Trade *</Label>
-                <Select value={formData.trade} onValueChange={(value) => handleInputChange('trade', value)}>
+                <Select
+                  value={formData.trade}
+                  onValueChange={(value) => handleInputChange("trade", value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select your trade" />
                   </SelectTrigger>
@@ -355,7 +417,9 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                   min="0"
                   max="50"
                   value={formData.yearsExperience}
-                  onChange={(e) => handleInputChange('yearsExperience', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("yearsExperience", e.target.value)
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -366,7 +430,9 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                   min="0"
                   step="0.01"
                   value={formData.hourlyRate}
-                  onChange={(e) => handleInputChange('hourlyRate', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("hourlyRate", e.target.value)
+                  }
                 />
               </div>
             </div>
@@ -378,7 +444,8 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                All documents must be in PDF, JPG, or PNG format. Maximum file size: 5MB per document.
+                All documents must be in PDF, JPG, or PNG format. Maximum file
+                size: 5MB per document.
               </AlertDescription>
             </Alert>
 
@@ -392,7 +459,12 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                   id="idDocument"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) => handleDocumentUpload('idDocument', e.target.files?.[0] || null)}
+                  onChange={(e) =>
+                    handleDocumentUpload(
+                      "idDocument",
+                      e.target.files?.[0] || null
+                    )
+                  }
                   required
                 />
               </div>
@@ -406,7 +478,12 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                   id="insuranceDocument"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) => handleDocumentUpload('insuranceDocument', e.target.files?.[0] || null)}
+                  onChange={(e) =>
+                    handleDocumentUpload(
+                      "insuranceDocument",
+                      e.target.files?.[0] || null
+                    )
+                  }
                   required
                 />
               </div>
@@ -420,7 +497,12 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                   id="qualificationsDocument"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) => handleDocumentUpload('qualificationsDocument', e.target.files?.[0] || null)}
+                  onChange={(e) =>
+                    handleDocumentUpload(
+                      "qualificationsDocument",
+                      e.target.files?.[0] || null
+                    )
+                  }
                   required
                 />
               </div>
@@ -428,13 +510,21 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
               <div className="space-y-2">
                 <Label htmlFor="tradeCardDocument">
                   <CreditCard className="w-4 h-4 inline mr-2" />
-                  Trade Card {tradesRequiringTradeCard.includes(formData.trade) ? '*' : '(Optional)'}
+                  Trade Card{" "}
+                  {tradesRequiringTradeCard.includes(formData.trade)
+                    ? "*"
+                    : "(Optional)"}
                 </Label>
                 <Input
                   id="tradeCardDocument"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) => handleDocumentUpload('tradeCardDocument', e.target.files?.[0] || null)}
+                  onChange={(e) =>
+                    handleDocumentUpload(
+                      "tradeCardDocument",
+                      e.target.files?.[0] || null
+                    )
+                  }
                   required={tradesRequiringTradeCard.includes(formData.trade)}
                 />
                 {tradesRequiringTradeCard.includes(formData.trade) && (
@@ -456,10 +546,14 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                   id="password"
                   type="password"
                   value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
                   required
                 />
-                <p className="text-sm text-muted-foreground">Minimum 8 characters</p>
+                <p className="text-sm text-muted-foreground">
+                  Minimum 8 characters
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password *</Label>
@@ -467,7 +561,9 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
                   id="confirmPassword"
                   type="password"
                   value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("confirmPassword", e.target.value)
+                  }
                   required
                 />
               </div>
@@ -480,20 +576,25 @@ export default function TradespersonRegistrationForm({ onRegistrationComplete }:
               <Checkbox
                 id="acceptTerms"
                 checked={formData.acceptTerms}
-                onCheckedChange={(checked) => handleInputChange('acceptTerms', checked as boolean)}
+                onCheckedChange={(checked) =>
+                  handleInputChange("acceptTerms", checked as boolean)
+                }
                 required
               />
               <Label htmlFor="acceptTerms" className="text-sm">
-                I accept the terms and conditions and agree to the privacy policy *
+                I accept the terms and conditions and agree to the privacy
+                policy *
               </Label>
             </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Submitting Registration...' : 'Submit Registration'}
+            {isSubmitting
+              ? "Submitting Registration..."
+              : "Submit Registration"}
           </Button>
         </form>
       </CardContent>
     </Card>
   );
-} 
+}

@@ -163,7 +163,7 @@ export default function Home() {
     const loadFeatured = async () => {
       try {
         const res = await fetch(
-          "/api/tradespeople/list?page=1&limit=3&sortBy=rating",
+          "/api/tradespeopleeeee/list?page=1&limit=3&sortBy=rating",
           { cache: "no-store" } as RequestInit
         );
         const data = await res.json();
